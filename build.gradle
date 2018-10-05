@@ -1,0 +1,82 @@
+group 'de.melnichuk'
+version '0.2.0'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
+    testCompile 'ch.qos.logback:logback-classic:1.2.3'
+    compile 'org.slf4j:slf4j-api:1.6.6'
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar, javadocJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name 'java-event-history'
+                packaging 'jar'
+                url 'https://github.com/yevmel/java-event-history'
+                description 'sampling events with multiple resolutions.'
+
+                scm {
+                    connection 'scm:git:git://github.com/yevmel/java-event-history.git'
+                    developerConnection 'scm:git:ssh://github.com:yevmel/java-event-history.git'
+                    url 'http://github.com/yevmel/java-event-history/tree/master'
+                }
+
+                licenses {
+                    license {
+                        name 'MIT'
+                        url 'https://github.com/yevmel/java-event-history/blob/master/LICENSE'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'yevmel'
+                        name 'Yevgeniy Melnichuk'
+                        email 'yevgeniy.melnichuk@googlemail.com'
+                    }
+                }
+            }
+
+        }
+    }
+}
