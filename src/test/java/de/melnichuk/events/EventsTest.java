@@ -3,15 +3,19 @@ package de.melnichuk.events;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 public class EventsTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventsTest.class);
 
     @Test
     public void shouldConsiderAllIncrements() {
         // when
-        final Events<Integer> events = new Events<>(10, 1, 5, 10);
+        final DefaultEvents<Integer> events = new DefaultEvents<>(10, 1, 5, 10);
 
         // then
         Assert.assertThat(events.getHistory().keySet(), Matchers.contains(1, 5, 10));
@@ -20,7 +24,7 @@ public class EventsTest {
     @Test
     public void shouldAlwaysAddFirstItem() {
         // given
-        final Events<Integer> events = new Events<>(10, 2, 5, 10);
+        final DefaultEvents<Integer> events = new DefaultEvents<>(10, 2, 5, 10);
 
         // when
         events.process(23);
@@ -35,14 +39,18 @@ public class EventsTest {
     }
 
     @Test
-    public void TODO_define_asserts() {
+    public void TODO_define_asserts() throws Exception {
         // given
-        final Events<Integer> events = new Events<>(20, 10, 1_000, 10_000);
+        final Events<Integer> events = new AsynchronousEventsDelegate<>(
+            new DefaultEvents<>(20, 10, 1_000, 10_000),
+            20
+        );
 
         // when
         IntStream.range(0, 100_000).forEach(events::process);
 
         // then
+        TimeUnit.SECONDS.sleep(2);
         events.getHistory().values().stream().forEach(System.out::println);
     }
 }
