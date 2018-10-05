@@ -1,1 +1,6 @@
 language: java
+jdk:
+  - oraclejdk8
+
+script:
+  - ./gradlew assemble --stacktrace -PossrhUsername -PossrhPassword
